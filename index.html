@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#101827" />
+  <title>OS CPU Scheduling Simulator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark">OS</div>
+    <div class="brand-copy"><strong>CPU Scheduling Lab</strong><span>Operating Systems · Algorithm Simulator</span></div>
+    <span class="live-pill"><i></i> Interactive</span><button id="themeBtn" class="btn btn-quiet">☼ Theme</button>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="eyebrow">OPERATING SYSTEMS PROJECT</div>
+      <h1>CPU Scheduling <span>Simulator</span></h1>
+      <p>Compare scheduling algorithms, play or pause the CPU timeline one time unit at a time, and analyze waiting, turnaround, response time, and utilization.</p>
+      <div class="hero-tags"><span>6 algorithms</span><span>Gantt chart</span><span>Performance metrics</span></div>
+    </section>
+
+    <section class="panel">
+      <div class="section-heading"><div><div class="step">01 / CONFIGURE</div><h2>Process input</h2></div><div class="heading-actions"><button id="sampleBtn" class="btn btn-quiet">Load sample</button><button id="clearBtn" class="btn btn-quiet">Clear</button></div></div>
+      <p class="muted">Enter each process's arrival time, CPU burst time, and priority. A smaller priority number means higher priority.</p>
+      <div class="table-wrap">
+        <table id="processTable">
+          <thead><tr><th>Process</th><th>Arrival time</th><th>Burst time</th><th>Priority</th><th></th></tr></thead>
+          <tbody id="processBody"></tbody>
+        </table>
+      </div>
+      <div class="input-actions"><button id="addProcessBtn" class="btn btn-outline">＋ Add process</button><span class="hint">Up to 10 processes · whole numbers only</span></div>
+      <div class="algorithm-grid">
+        <label class="field"><span>Scheduling algorithm</span><select id="algorithm">
+          <option value="fcfs">FCFS — First Come, First Served</option>
+          <option value="sjf">SJF — Shortest Job First (Non-preemptive)</option>
+          <option value="srtf">SRTF — Shortest Remaining Time First</option>
+          <option value="rr">Round Robin</option>
+          <option value="priority-np">Priority (Non-preemptive)</option>
+          <option value="priority-p">Priority (Preemptive)</option>
+        </select></label>
+        <label class="field" id="quantumField"><span>Time quantum (Round Robin)</span><input id="quantum" type="number" min="1" step="1" value="2" /></label>
+        <div class="field"><span>Priority rule</span><div class="rule-note">Smaller number = higher priority</div></div>
+      </div>
+      <div class="run-row"><button id="runBtn" class="btn btn-primary">▶ Run simulation</button><span id="status" class="status" aria-live="polite">Ready to simulate</span></div>
+      <div class="extra-actions"><button id="randomBtn" class="btn btn-quiet">🎲 Random processes</button><button id="saveBtn" class="btn btn-quiet">Save inputs</button><button id="loadBtn" class="btn btn-quiet">Load saved</button><button id="compareBtn" class="btn btn-outline">Compare all algorithms</button></div><div class="extra-actions"><button id="randomBtn" class="btn btn-quiet">🎲 Random processes</button><button id="saveBtn" class="btn btn-quiet">Save inputs</button><button id="loadBtn" class="btn btn-quiet">Load saved</button><button id="compareBtn" class="btn btn-outline">Compare all algorithms</button></div><div id="errorBox" class="error" hidden></div>
+    </section>
+
+    <section id="results" hidden>
+      <div class="section-heading result-heading"><div><div class="step">02 / RESULTS</div><h2>Simulation results</h2></div><span id="algorithmBadge" class="algorithm-badge"></span></div>
+      <div class="metrics-grid">
+        <article class="metric-card"><span>Average waiting time</span><strong id="avgWaiting">—</strong><small>Time units</small></article>
+        <article class="metric-card"><span>Average turnaround time</span><strong id="avgTurnaround">—</strong><small>Time units</small></article>
+        <article class="metric-card"><span>Average response time</span><strong id="avgResponse">—</strong><small>Time units</small></article>
+        <article class="metric-card"><span>Total CPU burst</span><strong id="totalBurst">—</strong><small>Time units</small></article><article class="metric-card"><span>CPU utilization</span><strong id="cpuUtil">—</strong><small>Busy time / elapsed time</small></article><article class="metric-card"><span>CPU utilization</span><strong id="cpuUtil">—</strong><small>Busy time / elapsed time</small></article>
+      </div>
+
+      <article class="panel">
+        <div class="section-heading"><div><div class="step">VISUALIZATION</div><h2>Gantt chart</h2></div><span class="muted small">Timeline is proportional to execution duration</span></div>
+        <div id="ganttChart" class="gantt-chart"></div>
+        <div id="ganttTicks" class="gantt-ticks"></div>
+        <div class="playback-controls" id="playbackControls">
+          <div class="playback-top"><strong>Process playback</strong><span id="playbackStatus">Run simulation first</span></div>
+          <div class="playback-buttons">
+            <button id="playBtn" class="btn btn-primary" disabled>▶ Play</button>
+            <button id="pauseBtn" class="btn btn-quiet" disabled>Ⅱ Pause</button>
+            <button id="stepBtn" class="btn btn-outline" disabled>▸ Step</button>
+            <button id="restartBtn" class="btn btn-quiet" disabled>↺ Restart</button>
+            <label class="speed-control">Interval <select id="playSpeed"><option value="1000">1 sec / unit</option><option value="2000">2 sec / unit</option><option value="500">0.5 sec / unit</option><option value="250">0.25 sec / unit</option></select></label>
+          </div>
+          <div class="playback-track"><div id="playProgress"></div></div>
+          <div class="playback-time"><span>Simulated time: <b id="simTime">0</b></span><span>Current process: <b id="currentProcess">—</b></span></div>
+        </div>
+        <div class="legend"><span><i class="legend-process"></i> Process running</span><span><i class="legend-idle"></i> CPU idle</span></div>
+      </article>
+
+      <article class="panel">
+        <div class="section-heading"><div><div class="step">PROCESS ANALYSIS</div><h2>Scheduling table</h2></div></div>
+        <div class="table-wrap"><table class="results-table"><thead><tr><th>Process</th><th>Arrival</th><th>Burst</th><th>Priority</th><th>First start</th><th>Completion</th><th>Turnaround</th><th>Waiting</th><th>Response</th></tr></thead><tbody id="resultsBody"></tbody></table></div>
+        <p class="formula-note"><b>Turnaround time</b> = Completion − Arrival · <b>Waiting time</b> = Turnaround − Burst · <b>Response time</b> = First start − Arrival</p>
+      </article>
+
+      <article class="panel explanation-panel">
+        <div class="section-heading"><div><div class="step">HOW IT WORKS</div><h2 id="explanationTitle">Algorithm notes</h2></div></div>
+        <p id="explanationText"></p>
+      </article>
+      <div class="footer-actions"><button id="exportBtn" class="btn btn-outline">↓ Export results as CSV</button><button id="printBtn" class="btn btn-quiet">Print / Save PDF</button></div>
+    </section>
+    <section id="comparisonPanel" class="panel compare-panel" hidden><div class="section-heading"><div><div class="step">ALGORITHM BENCHMARK</div><h2>Compare all six algorithms</h2></div><button id="closeCompare" class="btn btn-quiet">Close</button></div><p class="muted small">All algorithms use the same process inputs and Round Robin quantum. Lowest average waiting time is highlighted.</p><div class="table-wrap"><table class="compare-table"><thead><tr><th>Algorithm</th><th>Avg waiting</th><th>Avg turnaround</th><th>Avg response</th><th>CPU utilization</th></tr></thead><tbody id="comparisonBody"></tbody></table></div></section>
+    <section id="comparisonPanel" class="panel compare-panel" hidden><div class="section-heading"><div><div class="step">ALGORITHM BENCHMARK</div><h2>Compare all six algorithms</h2></div><button id="closeCompare" class="btn btn-quiet">Close</button></div><p class="muted small">All algorithms use the same process inputs and Round Robin quantum. Lowest average waiting time is highlighted.</p><div class="table-wrap"><table class="compare-table"><thead><tr><th>Algorithm</th><th>Avg waiting</th><th>Avg turnaround</th><th>Avg response</th><th>CPU utilization</th></tr></thead><tbody id="comparisonBody"></tbody></table></div></section>
+    <footer>CPU Scheduling Lab · Built for an Operating Systems mini project</footer>
+  </main>
+  <script src="script.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "cpu-scheduling-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mobile-friendly CPU scheduling algorithm simulator for Operating Systems lab work.",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
